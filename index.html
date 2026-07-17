@@ -106,7 +106,22 @@
                 ]
             }
         );
-        html5QrcodeScanner.render(onScanSuccess);
+       // Membuat objek scanner tanpa UI bawaan agar kamera langsung mengarah ke kamera belakang
+const html5QrCode = new Html5Qrcode("reader");
+const config = { 
+    fps: 15, 
+    qrbox: { width: 250, height: 150 } 
+};
+
+// Jalankan kamera belakang secara otomatis
+html5QrCode.start(
+    { facingMode: "environment" }, // "environment" artinya kamera belakang
+    config,
+    onScanSuccess
+).catch(err => {
+    console.error("Gagal menyalakan kamera: ", err);
+    showStatus("Gagal mengakses kamera. Pastikan izin kamera sudah diaktifkan!", "error");
+});
     </script>
 </body>
 </html>
