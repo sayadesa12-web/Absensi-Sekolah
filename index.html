@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi Guru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library handal untuk membaca QR Code dan berbagai format Barcode -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold text-slate-800 mb-1">Absensi Guru SDN/SMK</h1>
+        <p class="text-sm text-slate-500 mb-6">Arahkan kamera ke Barcode / QR Code</p>
+
+        <!-- Kotak Kamera Scanner -->
+        <div id="reader" class="overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-4" style="width: 100%;"></div>
+
+        <!-- Notifikasi Status -->
+        <div id="status-box" class="p-4 rounded-xl text-sm font-semibold hidden">
+            <p id="status-text"></p>
+        </div>
+    </div>
+
+    <script>
+        // === TEMPEL URL WEB APP DARI LANGKAH 2 DI SINI ===
+        const GOOGLE_WEB_APP_URL = "https://script.google.com/u/0/home/projects/1gZYyw-nmreUZiYuanrqSUxOzIQlnybIV3B-VkWMpcNAhAskZpWmOORDs/edit"; 
+
+        let scanningActive = true;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (!scanningActive) return;
+            scanningActive = false; // Kunci scanner agar tidak mengirim ganda
+
+            showStatus("Memproses kode: " + decodedText + "...", "info");
+
+            // Kirim data ke Google Sheets melalui Apps Script
+            fetch(GOOGLE_WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors", 
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    qr_id: decodedText
+                })
+            })
+            .then(() => {
+                showStatus("Absen Berhasil Dicatat! Jam: " + dapatkanJamSekarang(), "success");
+                bunyiBeep();
+                // Buka kembali scanner setelah jeda 4 detik untuk guru berikutnya
+                setTimeout(() => { 
+                    scanningActive = true; 
+                    showStatus("Siap memindai berikutnya...", "info");
+                }, 4000);
+            })
+            .catch(err => {
+                showStatus("Koneksi gagal: " + err, "error");
+                setTimeout(() => { scanningActive = true; }, 4000);
+            });
+        }
+
+        function dapatkanJamSekarang() {
+            const sekarang = new Date();
+            return sekarang.getHours().toString().padStart(2, '0') + ":" + sekarang.getMinutes().toString().padStart(2, '0');
+        }
+
+        function showStatus(message, type) {
+            const box = document.getElementById("status-box");
+            const text = document.getElementById("status-text");
+            box.classList.remove("hidden", "bg-blue-100", "text-blue-800", "bg-green-100", "text-green-800", "bg-red-100", "text-red-800");
+
+            if (type === "info") {
+                box.classList.add("bg-blue-100", "text-blue-800");
+            } else if (type === "success") {
+                box.classList.add("bg-green-100", "text-green-800");
+            } else {
+                box.classList.add("bg-red-100", "text-red-800");
+            }
+            text.innerText = message;
+            box.classList.remove("hidden");
+        }
+
+        function bunyiBeep() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Nada Beep tinggi
+            oscillator.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15); // Bunyi selama 0.15 detik
+        }
+
+        // Jalankan Scanner Kamera (Mendukung QR_CODE dan semua format BARCODE standar)
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { 
+                fps: 15, 
+                qrbox: { width: 250, height: 150 },
+                formatsToSupport: [ 
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.EAN_13
+                ]
+            }
+        );
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>
