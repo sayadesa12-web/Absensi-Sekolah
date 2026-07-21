@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Presensi Digital - SMK Ekuintek Sukatani</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Presensi Digital - SMK Ekuintek Sukatani</title>
   
   <!-- Font & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,11 +16,13 @@
 
   <style>
     :root {
-      --bg-dark: #0f0c1b;
-      --card-bg: rgba(26, 20, 48, 0.75);
-      --primary-purple: #7c3aed;
+      --bg-dark: #0b0914;
+      --panel-bg: rgba(22, 18, 38, 0.75);
+      --card-bg: rgba(30, 24, 52, 0.6);
+      --primary-purple: #8b5cf6;
       --primary-gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
-      --accent-glow: rgba(168, 85, 247, 0.35);
+      --accent-glow: rgba(168, 85, 247, 0.25);
+      --border-color: rgba(168, 85, 247, 0.18);
       --text-main: #f3f4f6;
       --text-sub: #9ca3af;
       --success: #10b981;
@@ -32,259 +34,436 @@
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       background-color: var(--bg-dark);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 40%);
+        radial-gradient(circle at 10% 10%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
       background-attachment: fixed;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 16px;
     }
 
-    /* Container Utama */
-    .app-container {
+    /* Web Navbar */
+    .web-navbar {
       width: 100%;
-      max-width: 440px;
+      background: rgba(15, 12, 27, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    /* Header & Identitas Sekolah */
-    .header-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(168, 85, 247, 0.2);
-      border-radius: 20px;
-      padding: 20px 16px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
-    }
-
-    .header-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .school-badge {
-      display: inline-flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      background: rgba(124, 58, 237, 0.2);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-      color: #d8b4fe;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .school-name {
-      font-size: 1.35rem;
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #fff;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
       font-weight: 800;
       background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.3px;
-      margin-bottom: 4px;
     }
 
-    .app-subtitle {
-      font-size: 0.85rem;
+    .brand-subtitle {
+      font-size: 0.8rem;
       color: var(--text-sub);
     }
 
-    /* Card Jam Real-time */
-    .time-card {
-      background: rgba(26, 20, 48, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .time-info {
+    .nav-status {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 24px;
     }
 
-    .time-icon {
-      width: 38px;
-      height: 38px;
-      background: var(--primary-gradient);
-      border-radius: 10px;
-      display: flex;
+    .status-badge {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1rem;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
     }
 
-    .clock-display {
-      font-size: 1.25rem;
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .clock-container {
+      text-align: right;
+    }
+
+    .clock-time {
+      font-size: 1.1rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
       color: #fff;
     }
 
-    .date-display {
+    .clock-date {
       font-size: 0.75rem;
       color: var(--text-sub);
     }
 
-    /* Frame Scanner Camera */
-    .scanner-card {
-      background: var(--card-bg);
+    /* Main Container */
+    .dashboard-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    /* Left Panel - Scanner */
+    .panel-scanner {
+      background: var(--panel-bg);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(168, 85, 247, 0.2);
+      border: 1px solid var(--border-color);
       border-radius: 24px;
-      padding: 16px;
-      position: relative;
-      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
-      min-height: 300px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      gap: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      height: fit-content;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .panel-header i {
+      color: var(--primary-purple);
     }
 
     #reader {
       width: 100%;
       border-radius: 16px;
       overflow: hidden;
-      border: none !important;
       background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     #reader video {
       object-fit: cover !important;
-      border-radius: 16px;
       width: 100% !important;
     }
 
-    /* Card Response Status */
-    .result-card {
+    .btn-start {
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-start:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .status-card {
       background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
       padding: 16px;
       text-align: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      min-height: 80px;
+      min-height: 70px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .status-standby {
-      color: var(--text-sub);
-      font-size: 0.85rem;
+    /* Right Panel - Log & Analytics */
+    .panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
     }
 
-    .status-success {
-      color: var(--success);
-      font-weight: 600;
-      animation: popIn 0.3s ease;
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--primary-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
     }
 
-    .status-error {
-      color: var(--error);
-      font-weight: 600;
-      animation: popIn 0.3s ease;
+    .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
     }
 
-    @keyframes popIn {
-      0% { transform: scale(0.9); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .footer-text {
-      text-align: center;
-      font-size: 0.7rem;
+    .stat-lbl {
+      font-size: 0.78rem;
       color: var(--text-sub);
-      margin-top: 8px;
-      opacity: 0.7;
+    }
+
+    /* Log Table */
+    .table-card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.88rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-scan {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .footer-web {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 20px;
+    }
+
+    /* Responsive adjustment */
+    @media (max-width: 992px) {
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-status {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
+  <!-- Web Navbar Header -->
+  <header class="web-navbar">
+    <div class="brand-section">
+      <div class="brand-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+      <div>
+        <div class="brand-title">SMK Ekuintek Sukatani</div>
+        <div class="brand-subtitle">Portal Sistem Presensi Digital Guru</div>
+      </div>
+    </div>
+
+    <div class="nav-status">
+      <div class="status-badge">
+        <span class="status-dot"></span> Server Online
+      </div>
+      <div class="clock-container">
+        <div class="clock-time" id="clock">00:00:00 WIB</div>
+        <div class="clock-date" id="date">Hari, Tanggal Bulan Tahun</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Main Layout -->
+  <main class="dashboard-container">
     
-    <!-- Header Identitas -->
-    <div class="header-card">
-      <div class="school-badge">
-        <i class="fa-solid fa-graduation-cap"></i> Sistem Absensi QR
+    <!-- Left Column: Scanner -->
+    <section class="panel-scanner">
+      <div class="panel-header">
+        <i class="fa-solid fa-qrcode"></i> Pemindai QR Code
       </div>
-      <h1 class="school-name">SMK Ekuintek Sukatani</h1>
-      <p class="app-subtitle">Arahkan QR Code Guru ke Kamera</p>
-    </div>
 
-    <!-- Jam Real-time -->
-    <div class="time-card">
-      <div class="time-info">
-        <div class="time-icon">
-          <i class="fa-regular fa-clock"></i>
-        </div>
-        <div>
-          <div class="clock-display" id="clock">00:00:00 WIB</div>
-          <div class="date-display" id="date">Hari, Tanggal Bulan Tahun</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Frame Scanner -->
-    <div class="scanner-card">
       <div id="reader"></div>
-    </div>
 
-    <!-- Tampilan Status Result -->
-    <div class="result-card" id="result-box">
-      <div class="status-standby" id="status-text">
-        <i class="fa-solid fa-qrcode"></i> Siap memindai barcode...
+      <button class="btn-start" id="start-btn" onclick="startScanner()">
+        <i class="fa-solid fa-camera"></i> Buka Kamera Scanner
+      </button>
+
+      <div class="status-card" id="result-box">
+        <div style="color: var(--text-sub); font-size: 0.85rem;">
+          <i class="fa-solid fa-info-circle"></i> Dekatkan QR Code ke kamera
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="footer-text">
-      &copy; Presensi Digital SMK Ekuintek Sukatani
-    </div>
+    <!-- Right Column: Live Table & Stats -->
+    <section class="panel-content">
+      
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+          <div>
+            <div class="stat-val" id="total-scans">0</div>
+            <div class="stat-lbl">Presensi Hari Ini</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div>
+            <div class="stat-val">Cepat</div>
+            <div class="stat-lbl">Respon Server</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div>
+            <div class="stat-val">Terverifikasi</div>
+            <div class="stat-lbl">Autentikasi QR</div>
+          </div>
+        </div>
+      </div>
 
-  </div>
+      <!-- Realtime Log Table -->
+      <div class="table-card">
+        <div class="panel-header">
+          <i class="fa-solid fa-list-check"></i> Riwayat Pemindaian Sesi Ini
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Kode / ID Guru</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="log-table-body">
+              <tr id="empty-row">
+                <td colspan="3" style="text-align: center; color: var(--text-sub); padding: 24px;">
+                  Belum ada data pemindaian pada sesi ini.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="footer-web">
+    &copy; 2026 Sistem Presensi Digital SMK Ekuintek Sukatani — All Rights Reserved.
+  </footer>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3bQP5nkZyVnesXbCd1p6zplwptdsFQXtISumfuP8f8amPVW_o2iYvzXEkEsFF5Tf3/exec";
 
-    // Jam Real-Time
+    let scanCount = 0;
+
     function updateClock() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -298,10 +477,9 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Sistem QR Code Scanner khusus Multi-Kamera
     let isProcessing = false;
     const resultBox = document.getElementById('result-box');
-    const html5QrCode = new Html5Qrcode("reader");
+    let html5QrCode = null;
 
     function onScanSuccess(qrCodeMessage) {
       if (isProcessing) return;
@@ -311,9 +489,12 @@
 
       resultBox.innerHTML = `
         <div style="color: #a855f7; font-weight: 600;">
-          <i class="fa-solid fa-spinner fa-spin"></i> Memproses data absensi...
+          <i class="fa-solid fa-spinner fa-spin"></i> Mengirim data ke server...
         </div>
       `;
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID');
 
       fetch(SCRIPT_URL, {
         method: 'POST',
@@ -325,32 +506,51 @@
       })
       .then(() => {
         resultBox.innerHTML = `
-          <div class="status-success">
-            <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i><br>
-            Absen Berhasil Dicatat!
+          <div style="color: var(--success); font-weight: 700;">
+            <i class="fa-solid fa-circle-check"></i> Absen Berhasil!
           </div>
         `;
+        addLogToTable(timeStr, qrCodeMessage, "Berhasil");
         resetScannerWithDelay();
       })
       .catch(error => {
         resultBox.innerHTML = `
-          <div class="status-error">
-            <i class="fa-solid fa-circle-xmark"></i> Gagal terhubung ke server!
+          <div style="color: var(--error); font-weight: 700;">
+            <i class="fa-solid fa-circle-xmark"></i> Gagal Kirim Data!
           </div>
         `;
         resetScannerWithDelay();
       });
     }
 
+    function addLogToTable(time, qrId, status) {
+      const emptyRow = document.getElementById('empty-row');
+      if (emptyRow) emptyRow.remove();
+
+      scanCount++;
+      document.getElementById('total-scans').innerText = scanCount;
+
+      const tbody = document.getElementById('log-table-body');
+      const newRow = document.createElement('tr');
+      
+      newRow.innerHTML = `
+        <td style="font-weight: 600;">${time}</td>
+        <td><code>${qrId}</code></td>
+        <td><span class="badge-scan"><i class="fa-solid fa-check"></i> ${status}</span></td>
+      `;
+
+      tbody.insertBefore(newRow, tbody.firstChild);
+    }
+
     function resetScannerWithDelay() {
       setTimeout(() => {
         resultBox.innerHTML = `
-          <div class="status-standby">
-            <i class="fa-solid fa-qrcode"></i> Siap memindai barcode berikutnya...
+          <div style="color: var(--text-sub); font-size: 0.85rem;">
+            <i class="fa-solid fa-info-circle"></i> Siap memindai barcode berikutnya...
           </div>
         `;
         isProcessing = false;
-      }, 3500);
+      }, 3000);
     }
 
     function playBeep() {
@@ -368,20 +568,43 @@
       } catch(e) {}
     }
 
-    // PAKSA MENGGUNAKAN KAMERA BELAKANG UTAMA
-    const config = { fps: 10, qrbox: { width: 220, height: 220 } };
-    
-    html5QrCode.start(
-      { facingMode: "environment" }, 
-      config, 
-      onScanSuccess
-    ).catch(err => {
-      console.error("Gagal membuka kamera otomatis:", err);
-      resultBox.innerHTML = `
-        <div class="status-error">
-          <i class="fa-solid fa-triangle-exclamation"></i> Klik 'Izinkan Kamera' di browser HP Anda.
-        </div>
-      `;
+    function startScanner() {
+      document.getElementById('start-btn').style.display = 'none';
+      html5QrCode = new Html5Qrcode("reader");
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          let cameraId = devices[devices.length - 1].id;
+
+          for (let dev of devices) {
+            if (dev.label.toLowerCase().includes('back') || dev.label.toLowerCase().includes('belakang') || dev.label.toLowerCase().includes('environment')) {
+              cameraId = dev.id;
+              break;
+            }
+          }
+
+          html5QrCode.start(
+            cameraId, 
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            onScanSuccess
+          ).catch(err => {
+            showError("Gagal membuka kamera: " + err);
+          });
+        } else {
+          showError("Kamera tidak ditemukan.");
+        }
+      }).catch(err => {
+        showError("Izin kamera ditolak. Aktifkan izin kamera browser Anda.");
+      });
+    }
+
+    function showError(msg) {
+      document.getElementById('start-btn').style.display = 'flex';
+      resultBox.innerHTML = `<div style="color: var(--error); font-size: 0.85rem;"><i class="fa-solid fa-triangle-exclamation"></i> ${msg}</div>`;
+    }
+
+    window.addEventListener('load', () => {
+      startScanner();
     });
   </script>
 </body>
