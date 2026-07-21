@@ -1,127 +1,395 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi Guru</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library handal untuk membaca QR Code dan berbagai format Barcode -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Presensi Digital - SMK Ekuintek Sukatani</title>
+  
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- HTML5 QR Code Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f0c1b;
+      --card-bg: rgba(26, 20, 48, 0.75);
+      --primary-purple: #7c3aed;
+      --primary-gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      --accent-glow: rgba(168, 85, 247, 0.35);
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* Container Utama */
+    .app-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header & Identitas Sekolah */
+    .header-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 20px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+    }
+
+    /* Hiasan Pendaran Kaca Header */
+    .header-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .school-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124, 58, 237, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #d8b4fe;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .school-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+
+    .app-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    /* Card Jam Real-time */
+    .time-card {
+      background: rgba(26, 20, 48, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .time-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .time-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--primary-gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    .clock-display {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .date-display {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+    }
+
+    /* Frame Scanner Camera */
+    .scanner-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 24px;
+      padding: 16px;
+      position: relative;
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: none !important;
+      background: #000;
+    }
+
+    #reader video {
+      object-fit: cover !important;
+      border-radius: 16px;
+    }
+
+    /* Sembunyikan watermark bawaan Html5Qrcode */
+    #reader__status_span, #reader__dashboard {
+      display: none !important;
+    }
+
+    /* Card Response Status */
+    .result-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-standby {
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-success {
+      color: var(--success);
+      font-weight: 600;
+      animation: popIn 0.3s ease;
+    }
+
+    .status-error {
+      color: var(--error);
+      font-weight: 600;
+      animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Footer / Watermark */
+    .footer-text {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <h1 class="text-2xl font-bold text-slate-800 mb-1">Absensi Guru SDN/SMK</h1>
-        <p class="text-sm text-slate-500 mb-6">Arahkan kamera ke Barcode / QR Code</p>
-
-        <!-- Kotak Kamera Scanner -->
-        <div id="reader" class="overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 mb-4" style="width: 100%;"></div>
-
-        <!-- Notifikasi Status -->
-        <div id="status-box" class="p-4 rounded-xl text-sm font-semibold hidden">
-            <p id="status-text"></p>
-        </div>
+  <div class="app-container">
+    
+    <!-- Header Identitas -->
+    <div class="header-card">
+      <div class="school-badge">
+        <i class="fa-solid fa-graduation-cap"></i> Sistem Absensi QR
+      </div>
+      <h1 class="school-name">SMK Ekuintek Sukatani</h1>
+      <p class="app-subtitle">Arahkan QR Code Guru ke Kamera</p>
     </div>
 
-    <script>
-        // === TEMPEL URL WEB APP DARI LANGKAH 2 DI SINI ===
-        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3bQP5nkZyVnesXbCd1p6zplwptdsFQXtISumfuP8f8amPVW_o2iYvzXEkEsFF5Tf3/exec"; 
+    <!-- Jam Real-time -->
+    <div class="time-card">
+      <div class="time-info">
+        <div class="time-icon">
+          <i class="fa-regular fa-clock"></i>
+        </div>
+        <div>
+          <div class="clock-display" id="clock">00:00:00 WIB</div>
+          <div class="date-display" id="date">Hari, Tanggal Bulan Tahun</div>
+        </div>
+      </div>
+    </div>
 
-        let scanningActive = true;
+    <!-- Frame Scanner -->
+    <div class="scanner-card">
+      <div id="reader"></div>
+    </div>
 
-        function onScanSuccess(decodedText, decodedResult) {
-            if (!scanningActive) return;
-            scanningActive = false; // Kunci scanner agar tidak mengirim ganda
+    <!-- Tampilan Status Result -->
+    <div class="result-card" id="result-box">
+      <div class="status-standby" id="status-text">
+        <i class="fa-solid fa-qrcode"></i> Siap memindai barcode...
+      </div>
+    </div>
 
-            showStatus("Memproses kode: " + decodedText + "...", "info");
+    <div class="footer-text">
+      &copy; Presensi Digital SMK Ekuintek Sukatani
+    </div>
 
-            // Kirim data ke Google Sheets melalui Apps Script
-            fetch(GOOGLE_WEB_APP_URL, {
-                method: "POST",
-                mode: "no-cors", 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    qr_id: decodedText
-                })
-            })
-            .then(() => {
-                showStatus("Absen Berhasil Dicatat! Jam: " + dapatkanJamSekarang(), "success");
-                bunyiBeep();
-                // Buka kembali scanner setelah jeda 4 detik untuk guru berikutnya
-                setTimeout(() => { 
-                    scanningActive = true; 
-                    showStatus("Siap memindai berikutnya...", "info");
-                }, 4000);
-            })
-            .catch(err => {
-                showStatus("Koneksi gagal: " + err, "error");
-                setTimeout(() => { scanningActive = true; }, 4000);
-            });
-        }
+  </div>
 
-        function dapatkanJamSekarang() {
-            const sekarang = new Date();
-            return sekarang.getHours().toString().padStart(2, '0') + ":" + sekarang.getMinutes().toString().padStart(2, '0');
-        }
+  <script>
+    // 1. URL WEB APP APPS SCRIPT ANDA (SUDAH DIINPUTKAN)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3bQP5nkZyVnesXbCd1p6zplwptdsFQXtISumfuP8f8amPVW_o2iYvzXEkEsFF5Tf3/exec";
 
-        function showStatus(message, type) {
-            const box = document.getElementById("status-box");
-            const text = document.getElementById("status-text");
-            box.classList.remove("hidden", "bg-blue-100", "text-blue-800", "bg-green-100", "text-green-800", "bg-red-100", "text-red-800");
+    // 2. Fungsi Jam Real-Time
+    function updateClock() {
+      const now = new Date();
+      
+      // Format Jam
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} WIB`;
 
-            if (type === "info") {
-                box.classList.add("bg-blue-100", "text-blue-800");
-            } else if (type === "success") {
-                box.classList.add("bg-green-100", "text-green-800");
-            } else {
-                box.classList.add("bg-red-100", "text-red-800");
-            }
-            text.innerText = message;
-            box.classList.remove("hidden");
-        }
+      // Format Tanggal Bahasa Indonesia
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('date').innerText = now.toLocaleDateString('id-ID', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-        function bunyiBeep() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Nada Beep tinggi
-            oscillator.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.15); // Bunyi selama 0.15 detik
-        }
+    // 3. Sistem QR Code Scanner
+    let isProcessing = false;
+    const resultBox = document.getElementById('result-box');
 
-        // Jalankan Scanner Kamera (Mendukung QR_CODE dan semua format BARCODE standar)
-        const html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { 
-                fps: 15, 
-                qrbox: { width: 250, height: 150 },
-                formatsToSupport: [ 
-                    Html5QrcodeSupportedFormats.QR_CODE,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.EAN_13
-                ]
-            }
-        );
-       // Membuat objek scanner tanpa UI bawaan agar kamera langsung mengarah ke kamera belakang
-const html5QrCode = new Html5Qrcode("reader");
-const config = { 
-    fps: 15, 
-    qrbox: { width: 250, height: 150 } 
-};
+    function onScanSuccess(qrCodeMessage) {
+      if (isProcessing) return; // Mencegah scan ganda bersamaan
+      isProcessing = true;
 
-// Jalankan kamera belakang secara otomatis
-html5QrCode.start(
-    { facingMode: "environment" }, // "environment" artinya kamera belakang
-    config,
-    onScanSuccess
-).catch(err => {
-    console.error("Gagal menyalakan kamera: ", err);
-    showStatus("Gagal mengakses kamera. Pastikan izin kamera sudah diaktifkan!", "error");
-});
-    </script>
+      // Suara Beep saat berhasil scan
+      playBeep();
+
+      // Ubah tampilan UI menjadi "Memproses"
+      resultBox.innerHTML = `
+        <div style="color: #a855f7; font-weight: 600;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Memproses data absensi...
+        </div>
+      `;
+
+      // Kirim data ke Google Apps Script
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qr_id: qrCodeMessage })
+      })
+      .then(() => {
+        // Berhasil Terkirim
+        resultBox.innerHTML = `
+          <div class="status-success">
+            <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i><br>
+            Absen Berhasil Dicatat!
+          </div>
+        `;
+        resetScannerWithDelay();
+      })
+      .catch(error => {
+        // Gagal Terkirim
+        resultBox.innerHTML = `
+          <div class="status-error">
+            <i class="fa-solid fa-circle-xmark"></i> Gagal terhubung ke server!
+          </div>
+        `;
+        resetScannerWithDelay();
+      });
+    }
+
+    function resetScannerWithDelay() {
+      setTimeout(() => {
+        resultBox.innerHTML = `
+          <div class="status-standby">
+            <i class="fa-solid fa-qrcode"></i> Siap memindai barcode berikutnya...
+          </div>
+        `;
+        isProcessing = false;
+      }, 3500); // Tunggu 3.5 detik sebelum siap scan lagi
+    }
+
+    // Efek Suara Beep
+    function playBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.15);
+      } catch(e) {}
+    }
+
+    // Inisialisasi Kamera HTML5 QR Code
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader", 
+      { 
+        fps: 10, 
+        qrbox: { width: 220, height: 220 },
+        aspectRatio: 1.0
+      },
+      /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
 </body>
 </html>
