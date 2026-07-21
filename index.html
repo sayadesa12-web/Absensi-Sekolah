@@ -72,7 +72,6 @@
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
     }
 
-    /* Hiasan Pendaran Kaca Header */
     .header-card::before {
       content: '';
       position: absolute;
@@ -168,6 +167,10 @@
       padding: 16px;
       position: relative;
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     #reader {
@@ -181,11 +184,7 @@
     #reader video {
       object-fit: cover !important;
       border-radius: 16px;
-    }
-
-    /* Sembunyikan watermark bawaan Html5Qrcode */
-    #reader__status_span, #reader__dashboard {
-      display: none !important;
+      width: 100% !important;
     }
 
     /* Card Response Status */
@@ -229,7 +228,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* Footer / Watermark */
     .footer-text {
       text-align: center;
       font-size: 0.7rem;
@@ -284,45 +282,39 @@
   </div>
 
   <script>
-    // 1. URL WEB APP APPS SCRIPT ANDA (SUDAH DIINPUTKAN)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3bQP5nkZyVnesXbCd1p6zplwptdsFQXtISumfuP8f8amPVW_o2iYvzXEkEsFF5Tf3/exec";
 
-    // 2. Fungsi Jam Real-Time
+    // Jam Real-Time
     function updateClock() {
       const now = new Date();
-      
-      // Format Jam
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
       document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} WIB`;
 
-      // Format Tanggal Bahasa Indonesia
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       document.getElementById('date').innerText = now.toLocaleDateString('id-ID', options);
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Sistem QR Code Scanner
+    // Sistem QR Code Scanner khusus Multi-Kamera
     let isProcessing = false;
     const resultBox = document.getElementById('result-box');
+    const html5QrCode = new Html5Qrcode("reader");
 
     function onScanSuccess(qrCodeMessage) {
-      if (isProcessing) return; // Mencegah scan ganda bersamaan
+      if (isProcessing) return;
       isProcessing = true;
 
-      // Suara Beep saat berhasil scan
       playBeep();
 
-      // Ubah tampilan UI menjadi "Memproses"
       resultBox.innerHTML = `
         <div style="color: #a855f7; font-weight: 600;">
           <i class="fa-solid fa-spinner fa-spin"></i> Memproses data absensi...
         </div>
       `;
 
-      // Kirim data ke Google Apps Script
       fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -332,7 +324,6 @@
         body: JSON.stringify({ qr_id: qrCodeMessage })
       })
       .then(() => {
-        // Berhasil Terkirim
         resultBox.innerHTML = `
           <div class="status-success">
             <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i><br>
@@ -342,7 +333,6 @@
         resetScannerWithDelay();
       })
       .catch(error => {
-        // Gagal Terkirim
         resultBox.innerHTML = `
           <div class="status-error">
             <i class="fa-solid fa-circle-xmark"></i> Gagal terhubung ke server!
@@ -360,10 +350,9 @@
           </div>
         `;
         isProcessing = false;
-      }, 3500); // Tunggu 3.5 detik sebelum siap scan lagi
+      }, 3500);
     }
 
-    // Efek Suara Beep
     function playBeep() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -379,17 +368,21 @@
       } catch(e) {}
     }
 
-    // Inisialisasi Kamera HTML5 QR Code
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader", 
-      { 
-        fps: 10, 
-        qrbox: { width: 220, height: 220 },
-        aspectRatio: 1.0
-      },
-      /* verbose= */ false
-    );
-    html5QrcodeScanner.render(onScanSuccess);
+    // PAKSA MENGGUNAKAN KAMERA BELAKANG UTAMA
+    const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+    
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      config, 
+      onScanSuccess
+    ).catch(err => {
+      console.error("Gagal membuka kamera otomatis:", err);
+      resultBox.innerHTML = `
+        <div class="status-error">
+          <i class="fa-solid fa-triangle-exclamation"></i> Klik 'Izinkan Kamera' di browser HP Anda.
+        </div>
+      `;
+    });
   </script>
 </body>
 </html>
